@@ -16,15 +16,13 @@ var clientCmd = &cobra.Command{
 	Short: "Start client service",
 	Long:  `Start client servive`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		options.ClientHostPort = net.JoinHostPort("0.0.0.0", strconv.Itoa(clientPort))
-		logger.Info(fmt.Sprintf("client service listening to :%s", options.ClientHostPort))
+		port := net.JoinHostPort("0.0.0.0", strconv.Itoa(clientPort))
+		logger.Info(fmt.Sprintf("client service listening to :%s", port))
 		zapLogger := logger.With(zap.String("service", "client"))
-		server := client.NewServer(options)
+		server := client.NewServer(port)
 		return logError(zapLogger, server.Run())
 	},
 }
-
-var options client.ConfigOptions
 
 func init() {
 	RootCmd.AddCommand(clientCmd)

@@ -14,9 +14,9 @@ type ConfigOptions struct {
 	ClientHostPort string
 }
 
-func NewServer(options ConfigOptions) *Server {
+func NewServer(hostPort string) *Server {
 	return &Server{
-		hostPort: options.ClientHostPort,
+		hostPort: hostPort,
 	}
 }
 
