@@ -28,7 +28,14 @@ The OAuth 2.0 authorization framework enables a third-party application to obtai
 ## Starting the app
 
 ```bash
-make run all
+make all
+```
+
+### Using docker
+
+```bash
+make build docker
+make run
 ```
 
 ## TODO
