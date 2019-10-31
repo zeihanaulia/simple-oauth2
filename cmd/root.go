@@ -35,10 +35,10 @@ func init() {
 	RootCmd.PersistentFlags().IntVarP(&protectedPort, "protected-service-port", "p", 8083, "Port for protected service")
 
 	logger, _ = zap.NewDevelopment(zap.AddStacktrace(zapcore.FatalLevel))
-	cobra.OnInitialize(beforInitialize)
+	cobra.OnInitialize(beforeInitialize)
 }
 
-func beforInitialize() {
+func beforeInitialize() {
 	if clientPort != 8081 {
 		logger.Info("client service port changed", zap.Int("old", 8081), zap.Int("new", clientPort))
 	}
