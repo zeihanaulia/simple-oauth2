@@ -16,12 +16,14 @@ var (
 	protectedPort     int
 )
 
+// RootCmd root for all command
 var RootCmd = &cobra.Command{
 	Use:   "simple-oauth2",
 	Short: "DELEGATE. - A oauth2 demo application.",
 	Long:  `DELEGATE. - A oauth2 demo application.`,
 }
 
+// Execute command for calling by main.go
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		logger.Fatal("What are you doing!", zap.Error(err))

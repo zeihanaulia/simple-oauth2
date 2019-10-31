@@ -6,20 +6,19 @@ import (
 	"net/http"
 )
 
+// Server authorization service
 type Server struct {
 	hostPort string
 }
 
-type ConfigOptions struct {
-	AuthorizationHostPort string
-}
-
+// NewServer like constructor for inject dependency
 func NewServer(hostPort string) *Server {
 	return &Server{
 		hostPort: hostPort,
 	}
 }
 
+// Run just wrap for running server
 func (s *Server) Run() error {
 	mux := s.createServerMux()
 	return http.ListenAndServe(s.hostPort, mux)
