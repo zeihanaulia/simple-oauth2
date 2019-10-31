@@ -33,7 +33,7 @@ make run all
 
 ## TODO
 
-1. Build template for client, authorization and protected service
+1. [Build template for client, authorization and protected service](https://github.com/zeihanaulia/simple-oauth2/tree/step/01-build-template-for-client-authz-protected-service)
 
 ## Reference
 
