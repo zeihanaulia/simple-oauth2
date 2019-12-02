@@ -38,27 +38,24 @@
 
       <div class="jumbotron">
 		  <h2>Approve this client?</h2>
-		  <% if (client.client_name) { %>
-		  <p><b>Name:</b> <code><%- client.client_name %></code></p>
-		  <% } %>
-		  <p><b>ID:</b> <code><%- client.client_id %></code></p>
-		  <% if (client.client_uri) { %>
-		  <p><b>URI:</b> <code><%- client.client_uri %></code></p>
-		  <% } %>
-		  <% if (client.logo_uri) { %>
-		  <p><b>logo:</b> <img src="<%- client.logo_uri %>" /></p>
-		  <% } %>
+		  
+		  {{ if .ClientID }} 
+		  	<p><b>ID:</b> <code>{{ .ClientID }} </code></p>
+		  {{ end }}
 		  
 		   <form class="form" action="/approve" method="POST">
-			   <input type="hidden" name="reqid" value="{{ .RequestID }}">
-			   <% if (scope) { %>
-			   <p>The client is requesting access to the following:</p>
-			   <ul>
-			   <% _.each(scope, function(s) { %>
-			   	  <li><input type="checkbox" name="scope_<%- s %>" id="scope_<%- s %>" checked="checked"> <label for="scope_<%- s %>"><%- s %></label></li>
-			   <% }); %>
-		       </ul>
-			   <% } %>
+			   <input type="hidden" name="reqid" value="{{.RequestID}}">
+			   {{ if .Scope }}
+					<p>The client is requesting access to the following:</p>
+					<ul>
+					{{ range $index, $element := .Scope }}
+						<li>
+							<input type="checkbox" name="scope_{{ $element }}" id="scope_{{ $element }}" checked="checked"> 
+							<label for="scope_{{ $element }}">{{ $element }}</label>
+						</li>
+					{{ end }}
+					</ul>
+			   {{ end }}
 			   <input type="submit" class="btn btn-success" name="approve" value="Approve">
 			   <input type="submit" class="btn btn-danger" name="deny" value="Deny">
 		   </form>

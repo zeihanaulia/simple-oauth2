@@ -37,7 +37,7 @@
     <div class="container">
 
       <div class="jumbotron">
-		  <p>Access token value: <span class="label label-danger">{{if .AccesToken}} {{ .AccesToken }} {{else}} NONE {{end}}</span></p>
+		  <p>Access token value: <span class="label label-danger">{{if .AccessToken}} {{ .AccessToken }} {{else}} NONE {{end}}</span></p>
 		  <p>Scope value: <span class="label label-danger">{{if .Scope}} {{ .Scope }} {{else}} NONE {{end}}</span></p>
 		  <p>Refresh token value: <span class="label label-danger">{{if .RefreshToken}} {{ .RefreshToken }} {{else}} NONE {{end}}</span></p>
 		  <a class="btn btn-default" href="/authorize">Get OAuth Token</a> 
