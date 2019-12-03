@@ -255,6 +255,25 @@ func (s *Server) token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if tr.GrantType == "client_credentials" {
+		// checking apakah scope yang diminta sama dengan scope yang diberikan akses
+		// checking apakah client id diizinkan untuk mengakses grant type ini
+		// checking apakah klien ini sudah memiliki token akses yang mungkin ingin kami batalkan terlebih dahulu
+
+		accessToken := randomstring.Generator(32)
+		refreshToken := randomstring.Generator(32)
+
+		// TODO: save access token and refresh token to persistence storage with client id
+		if err := s.saveToken(clientID, accessToken, refreshToken); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			simplehttp.HTMLRender(w, s.templatePath+"error.html", HTTPResponse{Error: err.Error()})
+			return
+		}
+
+		simplehttp.JSONRender(w, TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken, Scope: ""})
+		return
+	}
+
 	if tr.GrantType != "authorization_code" {
 		w.WriteHeader(http.StatusUnauthorized)
 		simplehttp.HTMLRender(w, s.templatePath+"error.html", HTTPResponse{Error: "unauthorized"})
