@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/zeihanaulia/simple-oauth2/repositories"
@@ -44,6 +45,8 @@ func (s *Server) createServerMux() http.Handler {
 }
 
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w, r)
+
 	t, err := template.ParseFiles("protected/templates/index.html")
 	if err != nil {
 		log.Fatal(err)
@@ -57,6 +60,8 @@ type ResourceResponse struct {
 }
 
 func (s *Server) resource(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w, r)
+
 	simplehttp.JSONRender(w, ResourceResponse{Name: "Protected Resource", Description: "This data has been protected by OAuth 2.0"})
 }
 
@@ -68,8 +73,22 @@ const (
 
 func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		setupCORS(&w, r)
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		authorization := r.Header.Get("Authorization")
 		if len(authorization) == 0 {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = io.WriteString(w, `{"error":"invalid_key"}`)
+			return
+		}
+
+		if len(strings.Split(authorization, " ")) < 2 {
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = io.WriteString(w, `{"error":"invalid_key"}`)
@@ -91,4 +110,10 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func setupCORS(w *http.ResponseWriter, r *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }

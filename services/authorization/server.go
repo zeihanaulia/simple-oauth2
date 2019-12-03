@@ -189,11 +189,7 @@ func (s *Server) approve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, simpleurl.Builder(redirectURI, map[string]string{
-			"access_token": accessToken,
-			"token_type":   "Bearer",
-			"scope":        "",
-		}), 301)
+		http.Redirect(w, r, "http://localhost:8081/callback#access_token="+accessToken+"&scope=&token_type=Bearer&state="+state, 301)
 		return
 	}
 
