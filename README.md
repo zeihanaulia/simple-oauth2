@@ -34,7 +34,7 @@ make all
 ### Using docker
 
 ```bash
-make build docker
+make build
 docker run --rm --name simple-oauth2 -p 8080-8083:8080-8083 zeihanaulia/simple-oauth2
 ```
 
