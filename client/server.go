@@ -155,11 +155,11 @@ type ResourceResponse struct {
 
 func (s *Server) fetch_resource(w http.ResponseWriter, r *http.Request) {
 
-	// token := clientsToken[authServerInfo.ClientID].(map[string]interface{})
+	token := clientsToken[authServerInfo.ClientID].(map[string]interface{})
 
 	headers := map[string]string{
 		"Content-type": "application/json",
-		// "Authorization": "Bearer " + token["access_token"].(string),
+		"Authorization": "Bearer " + token["access_token"].(string),
 	}
 
 	resp, err := simplehttp.Post("http://localhost:8083/resource", headers, []byte(``))
