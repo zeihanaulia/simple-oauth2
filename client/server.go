@@ -3,16 +3,12 @@ package client
 import (
 	"encoding/base64"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/zeihanaulia/simple-oauth2/pkg/simplestr"
 
 	"github.com/zeihanaulia/simple-oauth2/pkg/simplehttp"
-
-	"github.com/zeihanaulia/simple-oauth2/pkg/randomstring"
-
-	"github.com/zeihanaulia/simple-oauth2/pkg/simpleurl"
 )
 
 var states = make([]string, 0)
@@ -50,21 +46,50 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) authorize(w http.ResponseWriter, r *http.Request) {
-	var state = randomstring.Generator(32)
-	states = append(states, state) // save state for comparing in callback request
+	requestBody, _ := json.Marshal(map[string]string{
+		"grant_type": "client_credentials",
+		"scope":      "",
+	})
 
-	// don't cache authorize request
-	w.Header().Set("Cache-Control", "no-cache, private, max-age=0")
-	w.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("X-Accel-Expires", "0")
+	basicAuthEnc := base64.URLEncoding.EncodeToString([]byte(authServerInfo.ClientID + ":" + authServerInfo.ClientSecret))
+	headers := map[string]string{
+		"Content-type":  "application/json",
+		"Authorization": "Basic " + basicAuthEnc,
+	}
 
-	http.Redirect(w, r, simpleurl.Builder(authServerInfo.AuthorizationEndpoint, map[string]string{
-		"response_type": "code",
-		"client_id":     "oauth-client-1",
-		"redirect_uri":  "http://localhost:8081/callback",
-		"state":         state,
-	}), 301)
+	resp, err := simplehttp.Post(authServerInfo.TokenEndpoint, headers, requestBody)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		simplehttp.HTMLRender(w, "client/templates/error.html", HTTPResponse{Error: "Unable to fetch access token, server response: 400"})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		w.WriteHeader(http.StatusBadRequest)
+		simplehttp.HTMLRender(w, "client/templates/error.html", HTTPResponse{Error: "Unable to fetch access token, server response: 400"})
+		return
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	var cr CallbackResponse
+	_ = json.Unmarshal(body, &cr)
+
+	clientsToken[authServerInfo.ClientID] = map[string]interface{}{
+		"access_token":  cr.AccessToken,
+		"refresh_token": cr.RefreshToken,
+		"scope":         cr.Scope,
+	}
+
+	simplehttp.HTMLRender(w, "client/templates/index.html", Token{
+		AccessToken:  cr.AccessToken,
+		RefreshToken: cr.RefreshToken,
+		Scope:        cr.Scope,
+	})
 }
 
 type HTTPResponse struct {
@@ -119,8 +144,13 @@ func (s *Server) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
 	var cr CallbackResponse
-	_ = json.Unmarshal(resp, &cr)
+	_ = json.Unmarshal(body, &cr)
 
 	clientsToken[authServerInfo.ClientID] = map[string]interface{}{
 		"access_token":  cr.AccessToken,
@@ -158,7 +188,7 @@ func (s *Server) fetch_resource(w http.ResponseWriter, r *http.Request) {
 	token := clientsToken[authServerInfo.ClientID].(map[string]interface{})
 
 	headers := map[string]string{
-		"Content-type": "application/json",
+		"Content-type":  "application/json",
 		"Authorization": "Bearer " + token["access_token"].(string),
 	}
 
@@ -169,8 +199,13 @@ func (s *Server) fetch_resource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
 	var rr ResourceResponse
-	_ = json.Unmarshal(resp, &rr)
+	_ = json.Unmarshal(body, &rr)
 
 	simplehttp.HTMLRender(w, "client/templates/data.html", rr)
 }

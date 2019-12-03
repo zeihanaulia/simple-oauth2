@@ -3,13 +3,12 @@ package simplehttp
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"text/template"
 )
 
-func Post(url string, headers map[string]string, bodyRequest []byte) (body []byte, err error) {
+func Post(url string, headers map[string]string, bodyRequest []byte) (resp *http.Response, err error) {
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(bodyRequest))
 	if err != nil {
 		return
@@ -20,13 +19,7 @@ func Post(url string, headers map[string]string, bodyRequest []byte) (body []byt
 	}
 
 	client := http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err = ioutil.ReadAll(resp.Body)
+	resp, err = client.Do(request)
 	if err != nil {
 		return
 	}
