@@ -165,11 +165,35 @@ func (s *Server) approve(w http.ResponseWriter, r *http.Request) {
 
 	var redirectURI = query["redirect_uri"][0]
 	var state = query["state"][0]
+	var clientID = query["client_id"][0]
 
 	if approve == "" {
 		// deny
 		w.WriteHeader(http.StatusBadRequest)
 		simplehttp.HTMLRender(w, s.templatePath+"error.html", nil)
+		return
+	}
+
+	if query["response_type"][0] == "token" {
+		// check scope, apakah scope yang diminta sama seperti yang authorization server berikan?
+
+		// generate access token
+		var accessToken = randomstring.Generator(32)
+		var refreshToken = randomstring.Generator(32)
+
+		// TODO: save access token and refresh token to persistence storage with client id
+		// for the implicit flow can’t be used to get a refresh token
+		if err := s.saveToken(clientID, accessToken, refreshToken); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			simplehttp.HTMLRender(w, s.templatePath+"error.html", HTTPResponse{Error: err.Error()})
+			return
+		}
+
+		http.Redirect(w, r, simpleurl.Builder(redirectURI, map[string]string{
+			"access_token": accessToken,
+			"token_type":   "Bearer",
+			"scope":        "",
+		}), 301)
 		return
 	}
 
