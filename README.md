@@ -33,9 +33,20 @@ make all
 
 ### Using docker
 
+#### Build
+
 ```bash
-make build
-docker run --rm --name simple-oauth2 -p 8080-8083:8080-8083 zeihanaulia/simple-oauth2
+docker build -t zeihanaulia/oauth2:0.1 .
+```
+
+#### Run
+
+```bash
+docker run \
+  --rm \
+  --name otpsvc \
+  -p8080-8083:8080-8083 \
+  zeihanaulia/oauth2:0.1
 ```
 
 ## TODO
