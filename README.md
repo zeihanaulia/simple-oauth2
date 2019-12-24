@@ -41,6 +41,9 @@ docker run --rm --name simple-oauth2 -p 8080-8083:8080-8083 zeihanaulia/simple-o
 ## TODO
 
 1. [Build template for client, authorization and protected service](https://github.com/zeihanaulia/simple-oauth2/pull/1)
+2. [Implementation authorization code grant type code](https://github.com/zeihanaulia/simple-oauth2/pull/2)
+3. [Implementation authorization code grant type implicit](https://github.com/zeihanaulia/simple-oauth2/pull/8)
+4. [Implementation authorization code grant type credentials](https://github.com/zeihanaulia/simple-oauth2/pull/9)
 
 ## Reference
 
